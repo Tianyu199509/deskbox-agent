@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "deskbox": {
+      "command": "deskbox.exe",
+      "args": [
+        "--mcp"
+      ]
+    }
+  }
+}

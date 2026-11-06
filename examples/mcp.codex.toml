@@ -1,0 +1,3 @@
+[mcp_servers.deskbox]
+command = "deskbox.exe"
+args = ["--mcp"]

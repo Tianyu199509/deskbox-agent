@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "deskbox": {
+      "type": "stdio",
+      "command": "deskbox.exe",
+      "args": [
+        "--mcp"
+      ]
+    }
+  }
+}
