@@ -1,0 +1,350 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deskbox.app/schemas/custom-widget-manifest.v1.json",
+  "title": "DeskBox Custom Widget Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "id", "name", "view"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "author": { "type": "string" },
+    "description": { "type": "string" },
+    "icon": { "type": "string" },
+    "minSize": { "$ref": "#/$defs/sizeSpec" },
+    "defaultSize": { "$ref": "#/$defs/sizeSpec" },
+    "settings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/settingDef" }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "boolean"] }
+    },
+    "collections": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "maxItems": { "type": "integer", "minimum": 1, "maximum": 5000 },
+          "sort": { "type": "string", "enum": ["newestFirst", "oldestFirst"] }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["systemMetrics", "storageDrives", "pomodoro", "countdown", "aiMonitor", "weather", "calendar", "clock", "deviceState", "clipboard", "rss", "httpJson"] },
+          "url": { "type": "string" },
+          "city": { "type": "string" },
+          "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+          "targetCollection": { "type": "string" },
+          "itemsPath": { "type": "string" },
+          "maxItems": { "type": "integer", "minimum": 1, "maximum": 100 },
+          "fieldMap": { "type": "object", "additionalProperties": { "type": "string" } },
+          "stateMap": { "type": "object", "additionalProperties": { "type": "string" } },
+          "intervalMs": { "type": "integer", "minimum": 250 }
+        }
+      }
+    },
+    "onDrop": {
+      "type": "object",
+      "properties": {
+        "storage": { "type": "string", "enum": ["reference", "copy", "auto"] },
+        "action": { "$ref": "#/$defs/actionOrList" }
+      }
+    },
+    "script": {
+      "type": "object",
+      "properties": {
+        "entry": { "type": "string", "const": "logic.js" },
+        "tickIntervalMs": { "type": "integer", "minimum": 0, "maximum": 3600000 }
+      }
+    },
+    "capsule": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "glyph": { "type": "string" },
+        "badge": { "type": "string" },
+        "progress": { "type": ["string", "number"] },
+        "enableBounceOnUpdate": { "type": "boolean" },
+        "badgeIsWarning": { "type": ["string", "boolean"] },
+        "primaryAction": {
+          "type": "object",
+          "properties": {
+            "icon": { "type": "string" },
+            "tooltip": { "type": "string" },
+            "onClick": { "$ref": "#/$defs/actionOrList" }
+          }
+        }
+      }
+    },
+    "view": { "$ref": "#/$defs/nodeSpec" }
+  },
+  "$defs": {
+    "sizeSpec": {
+      "type": "object",
+      "properties": {
+        "width": { "type": "integer", "minimum": 160, "maximum": 1600 },
+        "height": { "type": "integer", "minimum": 100, "maximum": 1600 }
+      }
+    },
+    "optionSpec": {
+      "type": "object",
+      "required": ["value", "label"],
+      "properties": {
+        "value": { "type": "string" },
+        "label": { "type": "string" }
+      }
+    },
+    "settingDef": {
+      "type": "object",
+      "required": ["key", "type", "label"],
+      "properties": {
+        "key": { "type": "string" },
+        "type": { "type": "string", "enum": ["toggle", "choice", "text", "number", "moduleList", "secret"] },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "default": { "type": ["string", "number", "boolean"] },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/optionSpec" }
+        }
+      }
+    },
+    "actionSpec": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "state.set",
+            "state.toggle",
+            "state.increment",
+            "collection.prepend",
+            "collection.append",
+            "collection.update",
+            "collection.remove",
+            "collection.clear",
+            "collection.exportMarkdown",
+            "file.open",
+            "file.reveal",
+            "file.transform",
+            "file.pick",
+            "text.transform",
+            "launcher.open",
+            "system.control",
+            "system.openSetting",
+            "url.open",
+            "source.refresh",
+            "refreshSource",
+            "clipboard.copy",
+            "toast.show",
+            "reminder.notify",
+            "pomodoro.toggle",
+            "pomodoro.reset",
+            "pomodoro.extend",
+            "pomodoro.skip",
+            "pomodoro.cyclePhase",
+            "pomodoro.setPhase",
+            "pomodoro.sedentaryConfirm",
+            "pomodoro.sedentarySnooze",
+            "countdown.pin",
+            "countdown.delete",
+            "ai.refresh",
+            "ai.selectProvider",
+            "ai.run",
+            "script.run"
+          ]
+        },
+        "guard": { "type": "string" },
+        "key": { "type": "string" },
+        "fn": { "type": "string" },
+        "arg": { "type": "string" },
+        "value": { "type": ["string", "number", "boolean"] },
+        "collection": { "type": "string" },
+        "targetCollection": { "type": "string" },
+        "targetId": { "type": "string" },
+        "path": { "type": "string" },
+        "format": { "type": "string" },
+        "maxWidth": { "type": "integer" },
+        "quality": { "type": "integer" },
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "message": { "type": "string" },
+        "prompt": { "type": "string" },
+        "mode": { "type": "string", "enum": ["prepend", "append", "replace", "copy"] },
+        "itemsPath": { "type": "string" },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "stateMap": { "type": "object", "additionalProperties": { "type": "string" } },
+        "fieldMap": { "type": "object", "additionalProperties": { "type": "string" } },
+        "item": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean"] }
+        },
+        "then": { "$ref": "#/$defs/actionOrList" }
+      }
+    },
+    "actionOrList": {
+      "oneOf": [
+        { "$ref": "#/$defs/actionSpec" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionSpec" } }
+      ]
+    },
+    "emptyStateSpec": {
+      "type": "object",
+      "properties": {
+        "icon": { "type": "string" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" }
+      }
+    },
+    "nodeSpec": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Wrap",
+            "Spacer",
+            "ModuleStack",
+            "Grid",
+            "Card",
+            "Scroll",
+            "Text",
+            "Badge",
+            "Input",
+            "Button",
+            "Toggle",
+            "ProgressRing",
+            "Segmented",
+            "StatCard",
+            "GpuCard",
+            "ProcessList",
+            "PomodoroCard",
+            "CountdownHero",
+            "CountdownList",
+            "TimeProgressCard",
+            "AiFocusCard",
+            "AiRadarList",
+            "AiTokensCard",
+            "AiTrendCard",
+            "ProgressRow",
+            "KeyValueRow",
+            "List",
+            "FileChip",
+            "EmptyState",
+            "Expander",
+            "TextArea",
+            "IconButton",
+            "CheckBox",
+            "Select",
+            "Slider",
+            "NumberBox",
+            "Sparkline",
+            "HeatmapGrid",
+            "CalendarGrid",
+            "DropZone",
+            "ControlTile",
+            "Divider",
+            "ProgressBar",
+            "Image",
+            "Tabs",
+            "RingGauge",
+            "BarList"
+          ]
+        },
+        "id": { "type": "string" },
+        "visible": { "type": ["string", "boolean"] },
+        "orientation": { "type": "string", "enum": ["vertical", "horizontal"] },
+        "spacing": { "type": "number" },
+        "padding": { "type": ["string", "number"] },
+        "columns": { "type": "string" },
+        "rows": { "type": "string" },
+        "column": { "type": "integer" },
+        "row": { "type": "integer" },
+        "tone": { "type": "string" },
+        "variant": { "type": "string" },
+        "style": { "type": "string" },
+        "color": { "type": "string" },
+        "src": { "type": "string" },
+        "stretch": { "type": "string", "enum": ["uniform", "uniformToFill", "fill", "none"] },
+        "text": { "type": "string" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "value": { "type": ["string", "number", "boolean"] },
+        "placeholder": { "type": "string" },
+        "format": { "type": "string" },
+        "icon": { "type": "string" },
+        "tooltip": { "type": "string" },
+        "bind": { "type": "string" },
+        "progress": { "type": ["string", "number"] },
+        "sparkline": { "type": "string" },
+        "size": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "minHeight": { "type": "number" },
+        "maxHeight": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" },
+        "unit": { "type": "string" },
+        "strikethrough": { "type": "boolean" },
+        "defaultExpanded": { "type": "boolean" },
+        "showArea": { "type": "boolean" },
+        "showLatest": { "type": "boolean" },
+        "collection": { "type": "string" },
+        "titleField": { "type": "string" },
+        "subtitleField": { "type": "string" },
+        "valueField": { "type": "string" },
+        "dateField": { "type": "string" },
+        "days": { "type": "integer" },
+        "indeterminate": { "type": ["string", "boolean"] },
+        "maxLines": { "type": "integer" },
+        "warningThreshold": { "type": "number" },
+        "dangerThreshold": { "type": "number" },
+        "items": { "type": "string" },
+        "filter": { "type": "string" },
+        "fileName": { "type": "string" },
+        "filePath": { "type": "string" },
+        "storageMode": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/optionSpec" }
+        },
+        "emptyState": { "$ref": "#/$defs/emptyStateSpec" },
+        "itemTemplate": { "$ref": "#/$defs/nodeSpec" },
+        "hoverActions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nodeSpec" }
+        },
+        "horizontalAlignment": { "type": "string" },
+        "verticalAlignment": { "type": "string" },
+        "cornerRadius": { "type": "number" },
+        "onClick": { "$ref": "#/$defs/actionOrList" },
+        "onChange": { "$ref": "#/$defs/actionOrList" },
+        "onToggle": { "$ref": "#/$defs/actionOrList" },
+        "onSubmit": { "$ref": "#/$defs/actionOrList" },
+        "onDrop": { "$ref": "#/$defs/actionOrList" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nodeSpec" }
+        }
+      }
+    }
+  }
+}
