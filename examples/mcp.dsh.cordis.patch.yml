@@ -1,0 +1,8 @@
+# DeepSeek Harness (cordis.patch.yml)
+"@deepseek-ai/dsh-mcp-client":
+  servers:
+    deskbox:
+      transport: stdio
+      command: "deskbox.exe"
+      args:
+        - "--mcp"

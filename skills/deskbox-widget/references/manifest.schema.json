@@ -3,33 +3,123 @@
   "$id": "https://deskbox.app/schemas/custom-widget-manifest.v1.json",
   "title": "DeskBox Custom Widget Manifest",
   "type": "object",
-  "required": ["schemaVersion", "id", "name", "view"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "root",
+    "elements"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "schemaVersion": { "type": "integer", "const": 1 },
-    "id": { "type": "string", "minLength": 1 },
-    "name": { "type": "string", "minLength": 1 },
-    "version": { "type": "string" },
-    "author": { "type": "string" },
-    "description": { "type": "string" },
-    "icon": { "type": "string" },
-    "minSize": { "$ref": "#/$defs/sizeSpec" },
-    "defaultSize": { "$ref": "#/$defs/sizeSpec" },
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string"
+    },
+    "minAppVersion": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "official",
+        "local",
+        "package",
+        "community",
+        "agent",
+        "ai"
+      ]
+    },
+    "isCustomized": {
+      "type": "boolean"
+    },
+    "forkedFromId": {
+      "type": "string"
+    },
+    "forkedFromVersion": {
+      "type": "string"
+    },
+    "createdAtUtc": {
+      "type": "string"
+    },
+    "updatedAtUtc": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "author": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    },
+    "minSize": {
+      "$ref": "#/$defs/sizeSpec"
+    },
+    "defaultSize": {
+      "$ref": "#/$defs/sizeSpec"
+    },
     "settings": {
       "type": "array",
-      "items": { "$ref": "#/$defs/settingDef" }
+      "items": {
+        "$ref": "#/$defs/settingDef"
+      }
     },
     "state": {
       "type": "object",
-      "additionalProperties": { "type": ["string", "number", "boolean"] }
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "array",
+          "object"
+        ]
+      }
     },
     "collections": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "maxItems": { "type": "integer", "minimum": 1, "maximum": 5000 },
-          "sort": { "type": "string", "enum": ["newestFirst", "oldestFirst"] }
+          "maxItems": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "newestFirst",
+              "oldestFirst"
+            ]
+          },
+          "seedItems": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
         }
       }
     },
@@ -37,94 +127,308 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["type"],
+        "required": [
+          "type"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "type": { "type": "string", "enum": ["systemMetrics", "storageDrives", "pomodoro", "countdown", "aiMonitor", "weather", "calendar", "clock", "deviceState", "clipboard", "rss", "httpJson"] },
-          "url": { "type": "string" },
-          "city": { "type": "string" },
-          "headers": { "type": "object", "additionalProperties": { "type": "string" } },
-          "targetCollection": { "type": "string" },
-          "itemsPath": { "type": "string" },
-          "maxItems": { "type": "integer", "minimum": 1, "maximum": 100 },
-          "fieldMap": { "type": "object", "additionalProperties": { "type": "string" } },
-          "stateMap": { "type": "object", "additionalProperties": { "type": "string" } },
-          "intervalMs": { "type": "integer", "minimum": 250 }
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "systemMetrics",
+              "storageDrives",
+              "pomodoro",
+              "countdown",
+              "aiMonitor",
+              "weather",
+              "calendar",
+              "clock",
+              "deviceState",
+              "clipboard",
+              "music",
+              "todo",
+              "rss",
+              "httpJson",
+              "fileText",
+              "command"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "stateKey": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "workingDirectory": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "targetCollection": {
+            "type": "string"
+          },
+          "itemsPath": {
+            "type": "string"
+          },
+          "maxItems": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "fieldMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "stateMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "intervalMs": {
+            "type": "integer",
+            "minimum": 250
+          }
         }
       }
     },
     "onDrop": {
       "type": "object",
       "properties": {
-        "storage": { "type": "string", "enum": ["reference", "copy", "auto"] },
-        "action": { "$ref": "#/$defs/actionOrList" }
+        "storage": {
+          "type": "string",
+          "enum": [
+            "reference",
+            "copy",
+            "auto"
+          ]
+        },
+        "action": {
+          "$ref": "#/$defs/actionOrList"
+        }
       }
     },
     "script": {
       "type": "object",
       "properties": {
-        "entry": { "type": "string", "const": "logic.js" },
-        "tickIntervalMs": { "type": "integer", "minimum": 0, "maximum": 3600000 }
+        "entry": {
+          "type": "string",
+          "const": "logic.js"
+        },
+        "tickIntervalMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600000
+        }
       }
     },
     "capsule": {
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
-        "summary": { "type": "string" },
-        "glyph": { "type": "string" },
-        "badge": { "type": "string" },
-        "progress": { "type": ["string", "number"] },
-        "enableBounceOnUpdate": { "type": "boolean" },
-        "badgeIsWarning": { "type": ["string", "boolean"] },
+        "title": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "glyph": {
+          "type": "string"
+        },
+        "badge": {
+          "type": "string"
+        },
+        "progress": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "enableBounceOnUpdate": {
+          "type": "boolean"
+        },
+        "badgeIsWarning": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
         "primaryAction": {
           "type": "object",
           "properties": {
-            "icon": { "type": "string" },
-            "tooltip": { "type": "string" },
-            "onClick": { "$ref": "#/$defs/actionOrList" }
+            "icon": {
+              "type": "string"
+            },
+            "tooltip": {
+              "type": "string"
+            },
+            "onClick": {
+              "$ref": "#/$defs/actionOrList"
+            }
           }
         }
       }
     },
-    "view": { "$ref": "#/$defs/nodeSpec" }
+    "popovers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "root"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "placement": {
+            "type": "string",
+            "enum": [
+              "top",
+              "bottom",
+              "left",
+              "right",
+              "center"
+            ]
+          },
+          "root": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "elements": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/nodeSpec"
+      }
+    }
   },
   "$defs": {
     "sizeSpec": {
       "type": "object",
       "properties": {
-        "width": { "type": "integer", "minimum": 160, "maximum": 1600 },
-        "height": { "type": "integer", "minimum": 100, "maximum": 1600 }
+        "width": {
+          "type": "integer",
+          "minimum": 160,
+          "maximum": 1600
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 1600
+        }
       }
     },
     "optionSpec": {
       "type": "object",
-      "required": ["value", "label"],
+      "required": [
+        "value",
+        "label"
+      ],
       "properties": {
-        "value": { "type": "string" },
-        "label": { "type": "string" }
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
       }
     },
     "settingDef": {
       "type": "object",
-      "required": ["key", "type", "label"],
+      "required": [
+        "key",
+        "type",
+        "label"
+      ],
       "properties": {
-        "key": { "type": "string" },
-        "type": { "type": "string", "enum": ["toggle", "choice", "text", "number", "moduleList", "secret"] },
-        "label": { "type": "string" },
-        "description": { "type": "string" },
-        "default": { "type": ["string", "number", "boolean"] },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "toggle",
+            "choice",
+            "text",
+            "number",
+            "file",
+            "folder",
+            "moduleList",
+            "secret"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "accept": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "default": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
         "options": {
           "type": "array",
-          "items": { "$ref": "#/$defs/optionSpec" }
+          "items": {
+            "$ref": "#/$defs/optionSpec"
+          }
         }
       }
     },
     "actionSpec": {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "type": "string",
@@ -142,6 +446,8 @@
             "file.reveal",
             "file.transform",
             "file.pick",
+            "file.listDir",
+            "file.manage",
             "text.transform",
             "launcher.open",
             "system.control",
@@ -150,8 +456,14 @@
             "source.refresh",
             "refreshSource",
             "clipboard.copy",
+            "clipboard.captureImage",
             "toast.show",
             "reminder.notify",
+            "todo.add",
+            "todo.toggle",
+            "todo.remove",
+            "todo.cyclePriority",
+            "todo.clearCompleted",
             "pomodoro.toggle",
             "pomodoro.reset",
             "pomodoro.extend",
@@ -160,60 +472,268 @@
             "pomodoro.setPhase",
             "pomodoro.sedentaryConfirm",
             "pomodoro.sedentarySnooze",
+            "countdown.upsert",
             "countdown.pin",
             "countdown.delete",
             "ai.refresh",
             "ai.selectProvider",
             "ai.run",
-            "script.run"
+            "script.run",
+            "popover.open",
+            "popover.close",
+            "popover.toggle",
+            "tip.open",
+            "tip.close",
+            "tip.toggle",
+            "audio.cue",
+            "audio.play",
+            "audio.pause",
+            "audio.stop",
+            "audio.toggle",
+            "audio.setVolume",
+            "audio.stopAll",
+            "collection.reorder",
+            "http.request",
+            "job.cancel",
+            "command.cancel",
+            "file.writeText",
+            "command.run"
           ]
         },
-        "guard": { "type": "string" },
-        "key": { "type": "string" },
-        "fn": { "type": "string" },
-        "arg": { "type": "string" },
-        "value": { "type": ["string", "number", "boolean"] },
-        "collection": { "type": "string" },
-        "targetCollection": { "type": "string" },
-        "targetId": { "type": "string" },
-        "path": { "type": "string" },
-        "format": { "type": "string" },
-        "maxWidth": { "type": "integer" },
-        "quality": { "type": "integer" },
-        "url": { "type": "string" },
-        "title": { "type": "string" },
-        "text": { "type": "string" },
-        "message": { "type": "string" },
-        "prompt": { "type": "string" },
-        "mode": { "type": "string", "enum": ["prepend", "append", "replace", "copy"] },
-        "itemsPath": { "type": "string" },
-        "maxItems": { "type": "integer", "minimum": 1, "maximum": 50 },
-        "stateMap": { "type": "object", "additionalProperties": { "type": "string" } },
-        "fieldMap": { "type": "object", "additionalProperties": { "type": "string" } },
+        "id": {
+          "type": "string"
+        },
+        "jobKey": {
+          "type": "string"
+        },
+        "guard": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "copy",
+            "move",
+            "rename",
+            "recycle"
+          ]
+        },
+        "fn": {
+          "type": "string"
+        },
+        "onProgress": {
+          "type": "string"
+        },
+        "onComplete": {
+          "type": "string"
+        },
+        "arg": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        },
+        "popoverId": {
+          "type": "string"
+        },
+        "fromIndex": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "toIndex": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "body": {},
+        "append": {
+          "type": "boolean"
+        },
+        "multiple": {
+          "type": "boolean"
+        },
+        "accept": {
+          "type": "string"
+        },
+        "recursive": {
+          "type": "boolean"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        },
+        "longRunning": {
+          "type": "boolean"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "executable": {
+          "type": "string"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workingDirectory": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "object"
+          ]
+        },
+        "collection": {
+          "type": "string"
+        },
+        "targetCollection": {
+          "type": "string"
+        },
+        "targetId": {
+          "type": "string"
+        },
+        "sourceId": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "maxWidth": {
+          "type": "integer"
+        },
+        "quality": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "prepend",
+            "append",
+            "replace",
+            "copy",
+            "file",
+            "folder"
+          ]
+        },
+        "itemsPath": {
+          "type": "string"
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "stateMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "fieldMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "item": {
           "type": "object",
-          "additionalProperties": { "type": ["string", "number", "boolean"] }
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "object",
+              "null"
+            ]
+          }
         },
-        "then": { "$ref": "#/$defs/actionOrList" }
+        "then": {
+          "$ref": "#/$defs/actionOrList"
+        }
       }
     },
     "actionOrList": {
       "oneOf": [
-        { "$ref": "#/$defs/actionSpec" },
-        { "type": "array", "items": { "$ref": "#/$defs/actionSpec" } }
+        {
+          "$ref": "#/$defs/actionSpec"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actionSpec"
+          }
+        }
       ]
     },
     "emptyStateSpec": {
       "type": "object",
       "properties": {
-        "icon": { "type": "string" },
-        "title": { "type": "string" },
-        "subtitle": { "type": "string" }
+        "icon": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        }
       }
     },
     "nodeSpec": {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "type": "string",
@@ -233,16 +753,20 @@
             "ProgressRing",
             "Segmented",
             "StatCard",
-            "GpuCard",
-            "ProcessList",
-            "PomodoroCard",
-            "CountdownHero",
-            "CountdownList",
-            "TimeProgressCard",
-            "AiFocusCard",
-            "AiRadarList",
-            "AiTokensCard",
-            "AiTrendCard",
+            "ZStack",
+            "ItemsGrid",
+            "SelectorBar",
+            "FlipView",
+            "SplitView",
+            "SplitButton",
+            "DropDownButton",
+            "InfoBadge",
+            "InfoBar",
+            "TeachingTip",
+            "RichText",
+            "CodeBlock",
+            "RadialGauge",
+            "MediaPlayer",
             "ProgressRow",
             "KeyValueRow",
             "List",
@@ -265,84 +789,427 @@
             "Image",
             "Tabs",
             "RingGauge",
-            "BarList"
+            "BarList",
+            "Popover",
+            "Markdown",
+            "Table",
+            "DatePicker",
+            "TimePicker",
+            "DonutChart",
+            "Chart",
+            "Canvas",
+            "AutoSuggestInput",
+            "ColorPicker",
+            "RadioGroup",
+            "Rating"
           ]
         },
-        "id": { "type": "string" },
-        "visible": { "type": ["string", "boolean"] },
-        "orientation": { "type": "string", "enum": ["vertical", "horizontal"] },
-        "spacing": { "type": "number" },
-        "padding": { "type": ["string", "number"] },
-        "columns": { "type": "string" },
-        "rows": { "type": "string" },
-        "column": { "type": "integer" },
-        "row": { "type": "integer" },
-        "tone": { "type": "string" },
-        "variant": { "type": "string" },
-        "style": { "type": "string" },
-        "color": { "type": "string" },
-        "src": { "type": "string" },
-        "stretch": { "type": "string", "enum": ["uniform", "uniformToFill", "fill", "none"] },
-        "text": { "type": "string" },
-        "title": { "type": "string" },
-        "subtitle": { "type": "string" },
-        "value": { "type": ["string", "number", "boolean"] },
-        "placeholder": { "type": "string" },
-        "format": { "type": "string" },
-        "icon": { "type": "string" },
-        "tooltip": { "type": "string" },
-        "bind": { "type": "string" },
-        "progress": { "type": ["string", "number"] },
-        "sparkline": { "type": "string" },
-        "size": { "type": "number" },
-        "width": { "type": "number" },
-        "height": { "type": "number" },
-        "minHeight": { "type": "number" },
-        "maxHeight": { "type": "number" },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "step": { "type": "number" },
-        "unit": { "type": "string" },
-        "strikethrough": { "type": "boolean" },
-        "defaultExpanded": { "type": "boolean" },
-        "showArea": { "type": "boolean" },
-        "showLatest": { "type": "boolean" },
-        "collection": { "type": "string" },
-        "titleField": { "type": "string" },
-        "subtitleField": { "type": "string" },
-        "valueField": { "type": "string" },
-        "dateField": { "type": "string" },
-        "days": { "type": "integer" },
-        "indeterminate": { "type": ["string", "boolean"] },
-        "maxLines": { "type": "integer" },
-        "warningThreshold": { "type": "number" },
-        "dangerThreshold": { "type": "number" },
-        "items": { "type": "string" },
-        "filter": { "type": "string" },
-        "fileName": { "type": "string" },
-        "filePath": { "type": "string" },
-        "storageMode": { "type": "string" },
+        "id": {
+          "type": "string"
+        },
+        "when": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "visible": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "spacing": {
+          "type": "number"
+        },
+        "padding": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "columns": {
+          "type": [
+            "string",
+            "integer",
+            "array"
+          ]
+        },
+        "columnsCount": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "rows": {
+          "type": [
+            "string",
+            "array"
+          ]
+        },
+        "column": {
+          "type": "integer"
+        },
+        "row": {
+          "type": "integer"
+        },
+        "columnSpan": {
+          "type": "integer"
+        },
+        "rowSpan": {
+          "type": "integer"
+        },
+        "tone": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        },
+        "stretch": {
+          "type": "string",
+          "enum": [
+            "uniform",
+            "uniformToFill",
+            "fill",
+            "none"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "tooltip": {
+          "type": "string"
+        },
+        "bind": {
+          "type": "string"
+        },
+        "progress": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "sparkline": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "minHeight": {
+          "type": "number"
+        },
+        "maxHeight": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "strikethrough": {
+          "type": "boolean"
+        },
+        "defaultExpanded": {
+          "type": "boolean"
+        },
+        "showArea": {
+          "type": "boolean"
+        },
+        "showLatest": {
+          "type": "boolean"
+        },
+        "collection": {
+          "type": "string"
+        },
+        "titleField": {
+          "type": "string"
+        },
+        "subtitleField": {
+          "type": "string"
+        },
+        "valueField": {
+          "type": "string"
+        },
+        "dateField": {
+          "type": "string"
+        },
+        "days": {
+          "type": "integer"
+        },
+        "indeterminate": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "maxLines": {
+          "type": "integer"
+        },
+        "warningThreshold": {
+          "type": "number"
+        },
+        "dangerThreshold": {
+          "type": "number"
+        },
+        "items": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "storageMode": {
+          "type": "string"
+        },
         "options": {
           "type": "array",
-          "items": { "$ref": "#/$defs/optionSpec" }
+          "items": {
+            "$ref": "#/$defs/optionSpec"
+          }
         },
-        "emptyState": { "$ref": "#/$defs/emptyStateSpec" },
-        "itemTemplate": { "$ref": "#/$defs/nodeSpec" },
+        "emptyState": {
+          "$ref": "#/$defs/emptyStateSpec"
+        },
+        "horizontalAlignment": {
+          "type": "string"
+        },
+        "verticalAlignment": {
+          "type": "string"
+        },
+        "cornerRadius": {
+          "type": "number"
+        },
+        "onClick": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onChange": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onToggle": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "margin": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "minWidth": {
+          "type": "number"
+        },
+        "maxWidth": {
+          "type": "number"
+        },
+        "background": {
+          "type": "string"
+        },
+        "linearGradient": {
+          "type": "object"
+        },
+        "textColor": {
+          "type": "string"
+        },
+        "borderColor": {
+          "type": "string"
+        },
+        "borderWidth": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "fontSize": {
+          "type": "number"
+        },
+        "fontWeight": {
+          "type": "string"
+        },
+        "fontFamily": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        },
+        "popover": {
+          "type": "string"
+        },
+        "popoverId": {
+          "type": "string"
+        },
+        "placement": {
+          "type": "string"
+        },
+        "chartKind": {
+          "type": "string",
+          "enum": [
+            "line",
+            "bar",
+            "area"
+          ]
+        },
+        "colorField": {
+          "type": "string"
+        },
+        "xField": {
+          "type": "string"
+        },
+        "centerTitle": {
+          "type": "string"
+        },
+        "centerValue": {
+          "type": "string"
+        },
+        "showLegend": {
+          "type": "boolean"
+        },
+        "showGrid": {
+          "type": "boolean"
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "viewBox": {
+          "type": "string"
+        },
+        "elementsSource": {
+          "type": "string"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sortable": {
+          "type": "boolean"
+        },
+        "striped": {
+          "type": "boolean"
+        },
+        "showHeader": {
+          "type": "boolean"
+        },
+        "suggestionsSource": {
+          "type": "string"
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "presets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowHalfStar": {
+          "type": "boolean"
+        },
+        "allowReorder": {
+          "type": "boolean"
+        },
+        "inlineEditField": {
+          "type": "string"
+        },
+        "onSubmit": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onDrop": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onRowClick": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onItemClick": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onReorder": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "onInlineCommit": {
+          "$ref": "#/$defs/actionOrList"
+        },
+        "itemTemplate": {
+          "type": "string"
+        },
+        "pane": {
+          "type": "string"
+        },
+        "actionButton": {
+          "type": "string"
+        },
         "hoverActions": {
           "type": "array",
-          "items": { "$ref": "#/$defs/nodeSpec" }
+          "items": {
+            "type": "string"
+          }
         },
-        "horizontalAlignment": { "type": "string" },
-        "verticalAlignment": { "type": "string" },
-        "cornerRadius": { "type": "number" },
-        "onClick": { "$ref": "#/$defs/actionOrList" },
-        "onChange": { "$ref": "#/$defs/actionOrList" },
-        "onToggle": { "$ref": "#/$defs/actionOrList" },
-        "onSubmit": { "$ref": "#/$defs/actionOrList" },
-        "onDrop": { "$ref": "#/$defs/actionOrList" },
         "children": {
           "type": "array",
-          "items": { "$ref": "#/$defs/nodeSpec" }
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

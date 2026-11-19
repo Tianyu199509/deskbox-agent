@@ -14,19 +14,20 @@
 
 ## 2. 工具调用返回“DeskBox 桌面宿主未运行”（Host Not Running）
 
-DeskBox 的 7 个 MCP 工具分为两类：
+DeskBox 的 8 个 MCP 工具分为两类：
 
-- **可离线执行的纯规范/校验工具**（无需桌面宿主运行）：
+- **可离线执行或自动降级的只读/校验工具**（无需桌面宿主运行）：
   - `deskbox_get_widget_spec`
   - `deskbox_get_capability_spec`
   - `deskbox_validate_manifest`
+  - `deskbox_get_studio_context`（离线时返回 `hostOnline: false` 降级响应）
+  - `deskbox_list_widgets`（离线时自动降级为磁盘只读扫描 `status: "offline-disk-scan"`）
 - **需要桌面宿主在线的工具**（通过当前用户命名管道通信）：
-  - `deskbox_list_widgets`
   - `deskbox_upsert_widget`
   - `deskbox_capture_widget_preview`
   - `deskbox_push_widget_data`
 
-当后面 4 个工具返回宿主未运行时：
+当后面 3 个工具返回宿主未运行时：
 1. 请确认 DeskBox 桌面程序已启动（系统托盘中有 DeskBox 图标）。
 2. 请确认启动 AI 客户端的 Windows 账户权限与运行 DeskBox 的账户一致（不要一个在普通权限、一个在管理员提权会话下运行，否则命名管道会话隔离会导致无法互通）。
 3. 你可以在 **DeskBox 设置 → AI 与智能体 → 外部 Agent 生态 → 通用配置** 中点击 **本机服务自检**，检查 `MCP stdio` 与 `Named Pipe` 是否均显示绿灯。
@@ -45,7 +46,7 @@ DeskBox 的 7 个 MCP 工具分为两类：
 
 - 这是预期设计：`deskbox_upsert_widget` 采用 **默认暂存（Stage-by-Default）** 机制。
 - 当未传入 `commit: true` 时，工具只校验并暂存小组件配置，返回 `stageId` 供你预览确认，桌面不会发生任何变化。
-- 当你向 Agent 确认效果后，Agent 传入 `commit: true` 及对应的 `stageId` 和完整 `manifestJson`，小组件才会正式安装并刷新到桌面上。
+- 当你向 Agent 确认效果后，Agent 传入 `commit: true` 及对应的 `stageId`（仅凭 `stageId` 提交时可省略 `manifestJson`，重复提交幂等），小组件才会正式安装并刷新到桌面上。
 
 ---
 

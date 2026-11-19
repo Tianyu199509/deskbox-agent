@@ -42,6 +42,10 @@ codex mcp remove deskbox
 
 打开 `opencode.json`，删除 `mcp` 下的 `"deskbox"` 对象并保存。
 
+### 6. DeepSeek Harness (`dsh`)
+
+打开 `cordis.patch.yml`，删除 `"@deepseek-ai/dsh-mcp-client"` 下 `servers` 中的 `deskbox` 条目并保存。
+
 ---
 
 ## 三、移除可选的本地 Skill

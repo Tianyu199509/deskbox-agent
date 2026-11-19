@@ -80,7 +80,7 @@ args = ["--mcp"]
 }
 ```
 
-保存后在 **Cursor Settings → MCP** 中确认 `deskbox` 已启用并加载 7 个工具。
+保存后在 **Cursor Settings → MCP** 中确认 `deskbox` 已启用并加载 8 个工具。
 
 ---
 
@@ -141,6 +141,22 @@ args = ["--mcp"]
     }
   }
 }
+```
+
+---
+
+### 7. DeepSeek Harness (`dsh`)
+
+在工作区或全局 `cordis.patch.yml` 中配置 `@deepseek-ai/dsh-mcp-client`（参见 [`examples/mcp.dsh.cordis.patch.yml`](../examples/mcp.dsh.cordis.patch.yml)）：
+
+```yaml
+"@deepseek-ai/dsh-mcp-client":
+  servers:
+    deskbox:
+      transport: stdio
+      command: "deskbox.exe"
+      args:
+        - "--mcp"
 ```
 
 ---

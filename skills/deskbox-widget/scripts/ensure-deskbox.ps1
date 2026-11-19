@@ -4,7 +4,7 @@ Detects whether DeskBox (v1.6.0+) is installed and running on Windows, resolves 
 and optionally downloads, SHA256-verifies, installs, and starts DeskBox from the official GitHub Release.
 
 .DESCRIPTION
-Designed for AI Agents (Claude Code, Codex, Cursor, VS Code Copilot, Windsurf, Trae, Antigravity, OpenCode).
+Designed for AI Agents (Claude Code, Codex, Cursor, VS Code Copilot, Windsurf, Trae, Antigravity, OpenCode, DeepSeek Harness `dsh`).
 - Run without flags to inspect installation status and get the exact MCP command JSON.
 - Run with -StartHost to start the DeskBox desktop host if installed but not running.
 - Run with -Install -StartHost (ONLY after asking user confirmation) to download the latest official
@@ -118,7 +118,8 @@ function Test-McpSupported([string]$exePath) {
         $psi.StandardOutputEncoding = $utf8NoBom
         $p = [System.Diagnostics.Process]::Start($psi)
         $payload = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' + "`n" +
-                   '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"deskbox_list_widgets","arguments":{}}}' + "`n"
+                   '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"deskbox_get_studio_context","arguments":{"includeManifest":false}}}' + "`n" +
+                   '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"deskbox_list_widgets","arguments":{}}}' + "`n"
         $bytes = $utf8NoBom.GetBytes($payload)
         $p.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
         $p.StandardInput.BaseStream.Flush()
@@ -130,9 +131,25 @@ function Test-McpSupported([string]$exePath) {
             $initDoc = $lines[0] | ConvertFrom-Json
             $mcpOk = [bool]($initDoc.result.serverInfo.name -eq 'deskbox')
             $pipeOnline = $false
-            if ($lines.Count -ge 2) {
-                $callDoc = $lines[1] | ConvertFrom-Json
-                $pipeOnline = ($callDoc.result.isError -eq $false)
+            foreach ($line in ($lines | Select-Object -Skip 1)) {
+                $callDoc = $line | ConvertFrom-Json
+                if ($callDoc.id -eq 2 -and $callDoc.result -and ($callDoc.result.isError -ne $true) -and $callDoc.result.content.Count -ge 1) {
+                    try {
+                        $ctxJson = $callDoc.result.content[0].text | ConvertFrom-Json
+                        if ($null -ne $ctxJson.hostOnline) {
+                            $pipeOnline = [bool]$ctxJson.hostOnline
+                            break
+                        }
+                    } catch { }
+                }
+                if ($callDoc.id -eq 3 -and $callDoc.result -and ($callDoc.result.isError -eq $false) -and $callDoc.result.content.Count -ge 1) {
+                    try {
+                        $listJson = $callDoc.result.content[0].text | ConvertFrom-Json
+                        $pipeOnline = ($listJson.status -ne 'offline-disk-scan')
+                    } catch {
+                        $pipeOnline = $true
+                    }
+                }
             }
             return @{
                 McpSupported = $mcpOk
@@ -227,7 +244,9 @@ if (-not $info.Installed) {
 }
 
 $probe = Test-McpSupported -exePath $info.ExePath
-$hostRunning = [bool](Get-Process -Name 'DeskBox' -ErrorAction SilentlyContinue)
+$hostProc = Get-Process -Name 'DeskBox' -ErrorAction SilentlyContinue | Select-Object -First 1
+$hostRunning = [bool]$hostProc
+$hostPid = if ($hostProc) { $hostProc.Id } else { $null }
 
 if ($StartHost -and -not $probe.PipeOnline) {
     if ($info.Channel -eq 'store') {
@@ -240,7 +259,9 @@ if ($StartHost -and -not $probe.PipeOnline) {
         Start-Sleep -Milliseconds 500
         $probe = Test-McpSupported -exePath $info.ExePath
         if ($probe.PipeOnline) {
+            $hostProc = Get-Process -Name 'DeskBox' -ErrorAction SilentlyContinue | Select-Object -First 1
             $hostRunning = $true
+            $hostPid = if ($hostProc) { $hostProc.Id } else { $null }
             break
         }
     }
@@ -253,7 +274,7 @@ $version = Get-ExeVersionInfo -exePath $info.ExePath
 $nextAction = if (-not $probe.McpSupported) {
     'Installed DeskBox version is older than v1.6.0 and does not support --mcp. Ask the user for confirmation, then run this script with -Install -StartHost to upgrade to the latest release.'
 } elseif (-not $probe.PipeOnline) {
-    'DeskBox is installed and supports --mcp, but the desktop host is not running. Run this script with -StartHost or start DeskBox so live desktop widget tools (deskbox_list_widgets, deskbox_upsert_widget, deskbox_capture_widget_preview) are online.'
+    'DeskBox is installed and supports --mcp, but the desktop host is not running. Run this script with -StartHost or start DeskBox so live desktop widget tools (deskbox_upsert_widget, deskbox_capture_widget_preview, deskbox_push_widget_data) are online.'
 } else {
     'DeskBox and its Named Pipe host are online. Register the MCP server using mcpCommand and mcpArgs, then call deskbox_get_widget_spec.'
 }
@@ -269,7 +290,7 @@ $result = [ordered]@{
     mcpCommandLine  = $mcpCommandLine
     hostRunning     = $hostRunning
     pipeOnline      = [bool]$probe.PipeOnline
-    hostPid         = $probe.HostPid
+    hostPid         = $hostPid
     nextAction      = $nextAction
 }
 
