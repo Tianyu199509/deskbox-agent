@@ -13,7 +13,7 @@
    - 启动参数：`--mcp`
    - 完整命令：`deskbox.exe --mcp`
 2. **独立安装包 / 便携版（Direct）**：
-   - 可执行程序：`C:\Users\<用户名>\AppData\Local\Programs\DeskBox\DeskBox.exe`（若自定义了安装目录，请以实际路径为准；切勿指向 `DeskBox.Settings.exe`）
+   - 可执行程序：`C:\Users\<用户名>\AppData\Local\Programs\DeskBox\DeskBox.exe`（若自定义了安装目录，请以实际路径为准；DeskBox 1.6.0 已统一为单二进制 `DeskBox.exe`，请仅传 `--mcp`，勿传 `--settings` / `--studio`）
    - 启动参数：`--mcp`
    - 完整命令：`"C:\Users\<用户名>\AppData\Local\Programs\DeskBox\DeskBox.exe" --mcp`
 

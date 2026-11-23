@@ -26,21 +26,24 @@ $ReleasesHtmlUrl = "https://github.com/$GitHubRepo/releases/latest"
 
 function Find-DeskBoxInstallation {
     # 1. Check running DeskBox process first
+    $aliasPath = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\deskbox.exe'
     $runningProc = Get-Process -Name 'DeskBox' -ErrorAction SilentlyContinue |
         Where-Object { $_.Path -and (Test-Path $_.Path) } |
         Select-Object -First 1
     if ($runningProc) {
         $path = $runningProc.Path
         $isStore = $path -like '*\WindowsApps\*'
+        # For Microsoft Store packages, always invoke the App Execution Alias rather than the
+        # protected Program Files\WindowsApps binary so MSIX package identity & ACLs work cleanly.
+        $resolvedExe = if ($isStore -and (Test-Path $aliasPath)) { $aliasPath } else { $path }
         return @{
             Installed = $true
             Channel   = if ($isStore) { 'store' } else { 'direct' }
-            ExePath   = $path
+            ExePath   = $resolvedExe
         }
     }
 
     # 2. Check Microsoft Store App Execution Alias + AppxPackage
-    $aliasPath = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\deskbox.exe'
     $appx = Get-AppxPackage -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -like '*DeskBox*' -or $_.PackageFamilyName -like '*DeskBox*' } |
         Select-Object -First 1
@@ -163,8 +166,20 @@ function Test-McpSupported([string]$exePath) {
     }
 }
 
+function Resolve-OsArch {
+    try {
+        $osArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+        if ($osArch -eq 'Arm64') { return 'arm64' }
+        if ($osArch -eq 'X64') { return 'x64' }
+    } catch { }
+    if ($env:PROCESSOR_ARCHITEW6432 -eq 'ARM64' -or $env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
+        return 'arm64'
+    }
+    return 'x64'
+}
+
 function Install-LatestDeskBox {
-    $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'x64' }
+    $arch = Resolve-OsArch
     $headers = @{ 'User-Agent' = 'DeskBox-Agent-Bootstrap/1.6' }
     $release = Invoke-RestMethod -Uri $LatestReleaseApi -Headers $headers -TimeoutSec 20
 
@@ -218,10 +233,19 @@ if ($OpenReleasePage) {
 }
 
 $info = Find-DeskBoxInstallation
+$probe = if ($info.Installed) { Test-McpSupported -exePath $info.ExePath } else { @{ McpSupported = $false; PipeOnline = $false } }
 
-if (-not $info.Installed -and $Install) {
-    Install-LatestDeskBox
-    $info = Find-DeskBoxInstallation
+if ($Install) {
+    if (-not $info.Installed) {
+        Install-LatestDeskBox
+        $info = Find-DeskBoxInstallation
+        $probe = if ($info.Installed) { Test-McpSupported -exePath $info.ExePath } else { @{ McpSupported = $false; PipeOnline = $false } }
+    } elseif (-not $probe.McpSupported -and $info.Channel -eq 'direct') {
+        # Upgrade outdated (< v1.6.0) Direct installation in place; never install Direct alongside an outdated Store install.
+        Install-LatestDeskBox
+        $info = Find-DeskBoxInstallation
+        $probe = if ($info.Installed) { Test-McpSupported -exePath $info.ExePath } else { @{ McpSupported = $false; PipeOnline = $false } }
+    }
 }
 
 if (-not $info.Installed) {
@@ -243,12 +267,11 @@ if (-not $info.Installed) {
     exit 0
 }
 
-$probe = Test-McpSupported -exePath $info.ExePath
 $hostProc = Get-Process -Name 'DeskBox' -ErrorAction SilentlyContinue | Select-Object -First 1
 $hostRunning = [bool]$hostProc
 $hostPid = if ($hostProc) { $hostProc.Id } else { $null }
 
-if ($StartHost -and -not $probe.PipeOnline) {
+if ($StartHost -and $probe.McpSupported -and -not $probe.PipeOnline) {
     if ($info.Channel -eq 'store') {
         Start-Process 'deskbox.exe' | Out-Null
     } else {
@@ -272,7 +295,11 @@ $mcpCommandLine = if ($info.Channel -eq 'store') { 'deskbox.exe --mcp' } else { 
 $version = Get-ExeVersionInfo -exePath $info.ExePath
 
 $nextAction = if (-not $probe.McpSupported) {
-    'Installed DeskBox version is older than v1.6.0 and does not support --mcp. Ask the user for confirmation, then run this script with -Install -StartHost to upgrade to the latest release.'
+    if ($info.Channel -eq 'store') {
+        'Installed Microsoft Store version of DeskBox is older than v1.6.0 and does not support --mcp. Ask the user to update DeskBox to v1.6.0+ via Microsoft Store (https://apps.microsoft.com/detail/9PBZSNB4D69H) instead of installing a duplicate Direct copy.'
+    } else {
+        'Installed DeskBox version is older than v1.6.0 and does not support --mcp. Ask the user for confirmation, then run this script with -Install -StartHost to upgrade the Direct installation in place to the latest release.'
+    }
 } elseif (-not $probe.PipeOnline) {
     'DeskBox is installed and supports --mcp, but the desktop host is not running. Run this script with -StartHost or start DeskBox so live desktop widget tools (deskbox_upsert_widget, deskbox_capture_widget_preview, deskbox_push_widget_data) are online.'
 } else {

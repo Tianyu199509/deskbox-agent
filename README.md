@@ -54,7 +54,7 @@ Official setup documentation, auto-bootstrap script, full **12 Domain Capability
 - **扁平 `schemaVersion: 1` 元素图 + 语义图标 + 增量编辑**：所有小组件统一采用 `root` + `elements` + `popovers` 扁平元素图与语义图标名（无嵌套 `view` 与 PUA 码点）；`deskbox_upsert_widget` 支持全量与按节点增量修改（`upsertElements` / `removeElements` / `patchRoot` / `removeRootKeys` / `scriptHunks`）。
 - **按需轻量规范 + 12 领域能力包 / 37 原子能力单一真源**：`deskbox_get_widget_spec` 支持 `detail: "compact"`（约 3 KB 极速索引）与 `detail: "full"`；本仓库完整收录了 12 个领域能力包 / 37 个原子能力参考手册（[`API_REFERENCE.md`](skills/deskbox-widget/references/API_REFERENCE.md)）与 Draft 2020-12 [`manifest.schema.json`](skills/deskbox-widget/references/manifest.schema.json)。
 - **工坊双向实时感知（`deskbox_get_studio_context`）**：外部 Agent 可实时读取用户在格子工坊选中的目标节点路径、当前预览草稿、需求备忘与待确认暂存批次。
-- **默认暂存（Stage-by-Default）**：`deskbox_upsert_widget` 在未传 `commit: true` 时仅做校验与暂存并返回 `stageId`，不会直接改动桌面；只有你确认后，Agent 才会使用 `{ "commit": true, "stageId": "<stageId>" }` 提交上桌（可省略 `manifestJson`，重复提交幂等）。全量工具均附带 MCP 2025-03-26 标准 `annotations`（`readOnlyHint` / `idempotentHint`）。
+- **默认暂存 + 原生宿主审批（Stage-by-Default & Host Approval）**：`deskbox_upsert_widget` 标注 `destructiveHint: true`；未传 `commit: true` 时仅校验并暂存返回 `stageId`（可用 `deskbox_capture_widget_preview` 传 `stageId` 提前看真机截图），不改动桌面。确认后传 `{ "commit": true, "stageId": "<stageId>" }` 提交（禁止在 `commit: true` 时混传内联编辑或 `scriptHunks`）；凡涉及覆盖已有组件、清空数据或包含脚本/高危能力，DeskBox 会弹出原生宿主审批窗（默认焦点在拒绝、60 秒超时自动拒绝，三态提交租约防并发重放，提交后重试幂等）。外部改动可执行面会自动吊销高危权限覆写。全量工具均附带 MCP 2025-03-26 标准 `annotations`（`readOnlyHint` / `destructiveHint` / `idempotentHint`）。
 
 ---
 
@@ -67,8 +67,8 @@ Official setup documentation, auto-bootstrap script, full **12 Domain Capability
 | `deskbox_get_studio_context` | 否（离线自动降级） | 读取格子工坊实时状态：当前编辑格子、用户选中的节点路径、胶囊/展开视口、当前草稿 `manifest.json` 与待确认 `stageId` |
 | `deskbox_validate_manifest` | 否（支持离线调用） | 校验扁平 `schemaVersion: 1` `manifest.json` 语法、节点结构、QuickJS `logic.js` 与多语言包 |
 | `deskbox_list_widgets` | 否（离线自动读取磁盘） | 列出当前桌面小组件及工作区路径，或传入 `widgetId` 检查实时状态与集合统计 |
-| `deskbox_upsert_widget` | 是 | 默认暂存（支持整份 `manifestJson` 或增量 `upsertElements`/`removeElements`/`patchRoot`/`scriptHunks`，返回 `stageId` 不改桌面）；确认后传 `commit: true` + `stageId` 幂等提交上桌 |
-| `deskbox_capture_widget_preview` | 是 | 截取指定小组件的真实 WinUI 3 渲染预览图（支持 `expanded` / `capsule` / `live`） |
+| `deskbox_upsert_widget` | 是 | 默认暂存（支持整份 `manifestJson` 或增量 `upsertElements`/`removeElements`/`patchRoot`/`scriptHunks`，返回 `stageId` 不改桌面）；确认后单凭 `commit: true` + `stageId` 提交（覆盖/清数据/含脚本或高危能力时须在 DeskBox 原生审批窗点击允许；幂等） |
+| `deskbox_capture_widget_preview` | 是 | 截取指定小组件或未提交 `stageId` 的真实 WinUI 3 渲染预览图（支持 `expanded` / `capsule` / `live` 与 `dark` / `light` 主题） |
 | `deskbox_push_widget_data` | 是 | 向桌面小组件（如 AI 状态看板）推送实时状态与事件流 |
 
 ---

@@ -34,19 +34,22 @@ DeskBox 的 8 个 MCP 工具分为两类：
 
 ---
 
-## 3. 配置后客户端没有反应，或指向了 `DeskBox.Settings.exe`
+## 3. 配置后客户端没有反应，或参数写成了伴侣进程模式
 
-- DeskBox 的设置界面运行在独立的伴生进程 `DeskBox.Settings.exe` 中，而 MCP 服务入口位于主程序 `DeskBox.exe`。
-- 请确保 MCP 配置中的 `command` 指向 `DeskBox.exe`（或 Store 别名 `deskbox.exe`），**不要**指向 `DeskBox.Settings.exe`。
-- 使用 DeskBox 设置页内置的 **复制口令** 或 **通用配置** 按钮时，应用已自动将路径解析为主程序 `DeskBox.exe`。
+- DeskBox 1.6.0 将主宿主、设置中心（`--settings`）、格子工坊（`--studio`）与 MCP 桥接（`--mcp`）统一收敛在同一个可执行程序 `DeskBox.exe` 中（旧开发期独立 `DeskBox.Settings.exe` 已移除）。
+- 请确保 MCP 配置中的 `command` 指向 `DeskBox.exe`（或 Store 别名 `deskbox.exe`），且 `args` 为 `["--mcp"]`（切勿指向其它旧版辅助可执行文件或传入 `--settings` / `--studio`）。
+- 使用 DeskBox 设置页内置的 **复制口令** 或 **通用配置** 按钮时，应用已自动生成匹配当前渠道的正确配置。
+- 若使用 Store 版且禁用了应用执行别名，MCP 工具需要拉起宿主时也会尝试通过 `deskbox://startup` 协议兜底唤起；仍建议开启 `deskbox.exe` 别名以保证 `stdio` 入口可用。
 
 ---
 
-## 4. 调用了 `deskbox_upsert_widget` 但桌面上没有出现新小组件
+## 4. 调用了 `deskbox_upsert_widget` 但桌面上没有出现新小组件，或返回 `requiresHostApproval: true`
 
-- 这是预期设计：`deskbox_upsert_widget` 采用 **默认暂存（Stage-by-Default）** 机制。
-- 当未传入 `commit: true` 时，工具只校验并暂存小组件配置，返回 `stageId` 供你预览确认，桌面不会发生任何变化。
-- 当你向 Agent 确认效果后，Agent 传入 `commit: true` 及对应的 `stageId`（仅凭 `stageId` 提交时可省略 `manifestJson`，重复提交幂等），小组件才会正式安装并刷新到桌面上。
+- **默认暂存（Stage-by-Default）**：当未传入 `commit: true` 时，工具只校验并暂存小组件配置，返回 `stageId` 供你预览确认（也可以用 `deskbox_capture_widget_preview` 传入 `stageId` 在提交前截预览图），桌面不会发生任何变化。
+- **原生宿主审批门禁（Host Approval）**：当你确认后，Agent 传入 `{ "commit": true, "stageId": "<stageId>" }` 提交上桌（注意 `commit: true` 时禁止同时携带 `upsertElements` / `scriptHunks` 等内联编辑，须先重新暂存）。如果本次提交涉及 **覆盖已有小组件、清空现有数据，或包含脚本 / 高危能力**，DeskBox 会弹出原生的桌面审批确认窗（默认焦点在「拒绝」，60 秒无响应自动拒绝）。
+  - 如果你点击了拒绝或弹窗超时，工具会返回 `committed: false, staged: true, requiresHostApproval: true`，**暂存包会保留**，Agent 不得自动静默重试，需等你再次明确指示。
+  - 提交采用三态租约防重入：同一 `stageId` 正在审批或落盘时并发重放会返回 `CommitInProgress`；落盘完成后重放同一 `stageId` 则幂等返回成功（`idempotent: true`）。
+- **外部修改后的权限过期**：外部 Agent 覆盖已有小组件并改动了可执行面（`logic.js` 或高危节点）时，原有的高危能力覆写（局域网/本地文件/命令执行）会自动吊销，需在 DeskBox 中重新授权；`CommandExecution` 永不隐式授予。
 
 ---
 
